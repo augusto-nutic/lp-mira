@@ -149,6 +149,7 @@ const form = document.getElementById("lead-form");
 const feedback = document.getElementById("form-feedback");
 
 if (form && feedback) {
+  const nativeFormSubmit = HTMLFormElement.prototype.submit;
   const submitButton = form.querySelector("button[type='submit']");
   const defaultButtonLabel =
     submitButton?.dataset.defaultLabel || submitButton?.textContent?.trim() || "Enviar";
@@ -449,7 +450,10 @@ if (form && feedback) {
       });
 
       if (!response.ok) {
-        throw new Error(`Formspree returned ${response.status}`);
+        const responseBody = await response.text();
+        throw new Error(
+          responseBody || `Formspree returned ${response.status}`,
+        );
       }
 
       trackLeadSubmission(formData);
@@ -461,6 +465,20 @@ if (form && feedback) {
       clearValidationState();
       populateLeadContext();
     } catch (error) {
+      const errorMessage = String(error?.message || "");
+      const networkBlocked =
+        error instanceof TypeError ||
+        /Failed to fetch|Load failed|NetworkError/i.test(errorMessage);
+
+      if (networkBlocked) {
+        setFeedbackState(
+          "Seu navegador bloqueou o envio em background. Vamos enviar pelo modo padrao para garantir a entrega.",
+          "loading",
+        );
+        nativeFormSubmit.call(form);
+        return;
+      }
+
       setFeedbackState(
         "Nao foi possivel enviar agora. Tente novamente em alguns instantes.",
         "error",
