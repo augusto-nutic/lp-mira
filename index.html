@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mira AI</title>
-    <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="topbar">
@@ -17,7 +20,13 @@
             <small>IA para cobranca no WhatsApp</small>
           </span>
         </a>
-        <nav class="site-nav" aria-label="Navegacao principal">
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span class="sr-only">Abrir menu</span>
+        </button>
+        <nav class="site-nav" id="site-nav" aria-label="Navegacao principal">
           <a class="site-link" href="#plano">Planos</a>
           <a class="site-link" href="#faq">FAQ</a>
           <a class="button button-primary header-cta" href="#formulario">Contato</a>
@@ -26,8 +35,8 @@
     </div>
   </header>
 
-  <main id="top">
-    <section class="section hero">
+  <main>
+    <section class="section hero" id="top">
       <div class="container">
         <div class="card hero-grid">
           <div class="hero-copy" data-reveal>
@@ -49,7 +58,7 @@
               <strong>7x</strong>
               <span>mais rapidez para disparar, cobrar, responder objecoes e fechar acordos.</span>
             </div>
-            <div class="chat-preview">
+            <div class="chat-preview" id="demo">
               <header>
                 <span>Demo ao vivo</span>
                 <span>WhatsApp + IA</span>
@@ -195,7 +204,6 @@
         <span>Mira AI</span>
       </a>
       <div class="footer-links">
-        <a href="#top">Logo</a>
         <a href="#faq">Termos</a>
         <a href="#faq">Privacidade</a>
         <a href="#formulario">Contato</a>
