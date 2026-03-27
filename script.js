@@ -149,12 +149,324 @@ const form = document.getElementById("lead-form");
 const feedback = document.getElementById("form-feedback");
 
 if (form && feedback) {
-  form.addEventListener("submit", (event) => {
+  const submitButton = form.querySelector("button[type='submit']");
+  const defaultButtonLabel =
+    submitButton?.dataset.defaultLabel || submitButton?.textContent?.trim() || "Enviar";
+  const loadingButtonLabel =
+    submitButton?.dataset.loadingLabel || "Enviando...";
+  const defaultFeedbackMessage = feedback.textContent;
+  const validationFeedbackMessage = "Revise os campos destacados e tente novamente.";
+  const formspreeEndpoint =
+    form.dataset.formspreeEndpoint?.trim() ||
+    form.getAttribute("action")?.trim() ||
+    "";
+  const validationFields = [
+    form.querySelector("#nome"),
+    form.querySelector("#email"),
+    form.querySelector("#whatsapp"),
+    form.querySelector("#empresa"),
+  ].filter(Boolean);
+
+  function setFeedbackState(message, state = "default") {
+    feedback.textContent = message;
+    feedback.classList.remove("is-loading", "is-success", "is-error");
+
+    if (state !== "default") {
+      feedback.classList.add(`is-${state}`);
+    }
+  }
+
+  function setSubmittingState(isSubmitting) {
+    if (!submitButton) {
+      return;
+    }
+
+    submitButton.disabled = isSubmitting;
+    submitButton.textContent = isSubmitting
+      ? loadingButtonLabel
+      : defaultButtonLabel;
+  }
+
+  function setHiddenFieldValue(fieldName, value) {
+    const field = form.querySelector(`[name="${fieldName}"]`);
+
+    if (field) {
+      field.value = value;
+    }
+  }
+
+  function normalizeText(value) {
+    return value.replace(/\s+/g, " ").trim();
+  }
+
+  function sanitizePhoneDigits(value) {
+    let digits = value.replace(/\D/g, "");
+
+    if (digits.length > 11 && digits.startsWith("55")) {
+      digits = digits.slice(2);
+    }
+
+    return digits.slice(0, 11);
+  }
+
+  function formatWhatsapp(value) {
+    const digits = sanitizePhoneDigits(value);
+
+    if (!digits) {
+      return "";
+    }
+
+    if (digits.length < 3) {
+      return `(${digits}`;
+    }
+
+    if (digits.length < 7) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    }
+
+    if (digits.length < 11) {
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    }
+
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+  }
+
+  function getFieldErrorElement(field) {
+    const errorId = field.getAttribute("aria-describedby");
+
+    return errorId ? document.getElementById(errorId) : null;
+  }
+
+  function setFieldError(field, message = "") {
+    const errorElement = getFieldErrorElement(field);
+    const hasError = Boolean(message);
+
+    field.classList.toggle("is-invalid", hasError);
+    field.setAttribute("aria-invalid", hasError ? "true" : "false");
+
+    if (errorElement) {
+      errorElement.textContent = message;
+    }
+  }
+
+  function clearValidationState() {
+    validationFields.forEach((field) => {
+      setFieldError(field);
+    });
+  }
+
+  function sanitizeFieldValue(field, mode = "submit") {
+    if (field.name === "whatsapp") {
+      field.value = formatWhatsapp(field.value);
+      return;
+    }
+
+    if (mode === "blur" || mode === "submit") {
+      if (field.name === "nome" || field.name === "empresa") {
+        field.value = normalizeText(field.value);
+      }
+
+      if (field.name === "email") {
+        field.value = field.value.trim();
+      }
+    }
+  }
+
+  function validateField(field, mode = "submit") {
+    sanitizeFieldValue(field, mode);
+
+    let message = "";
+
+    if (field.name === "nome") {
+      const normalizedName = normalizeText(field.value);
+
+      if (!normalizedName) {
+        message = "Informe seu nome.";
+      } else if (normalizedName.length < 3) {
+        message = "Digite pelo menos 3 letras.";
+      } else if (!/^[\p{L}' -]+$/u.test(normalizedName)) {
+        message = "Use apenas letras, espacos, apostrofo e hifen.";
+      }
+    }
+
+    if (field.name === "email") {
+      const normalizedEmail = field.value.trim();
+
+      if (!normalizedEmail) {
+        message = "Informe seu email.";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(normalizedEmail)) {
+        message = "Digite um email valido.";
+      }
+    }
+
+    if (field.name === "whatsapp") {
+      const phoneDigits = sanitizePhoneDigits(field.value);
+
+      if (!phoneDigits) {
+        message = "Informe seu WhatsApp.";
+      } else if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+        message = "Digite um numero com DDD.";
+      } else if (/^0/.test(phoneDigits)) {
+        message = "Digite um WhatsApp valido.";
+      }
+    }
+
+    if (field.name === "empresa") {
+      const normalizedCompany = normalizeText(field.value);
+
+      if (!normalizedCompany) {
+        message = "Informe o nome da empresa.";
+      } else if (normalizedCompany.length < 2) {
+        message = "Digite pelo menos 2 caracteres.";
+      } else if (!/[\p{L}\d]/u.test(normalizedCompany)) {
+        message = "Digite um nome de empresa valido.";
+      }
+    }
+
+    setFieldError(field, message);
+
+    if (
+      !message &&
+      feedback.textContent === validationFeedbackMessage &&
+      !validationFields.some((input) => input.classList.contains("is-invalid"))
+    ) {
+      setFeedbackState(defaultFeedbackMessage);
+    }
+
+    return !message;
+  }
+
+  function validateForm() {
+    let firstInvalidField = null;
+
+    validationFields.forEach((field) => {
+      const isValid = validateField(field, "submit");
+
+      if (!isValid && !firstInvalidField) {
+        firstInvalidField = field;
+      }
+    });
+
+    if (firstInvalidField) {
+      setFeedbackState(validationFeedbackMessage, "error");
+      firstInvalidField.focus();
+      return false;
+    }
+
+    return true;
+  }
+
+  function populateLeadContext() {
+    const searchParams = new URLSearchParams(window.location.search);
+    const trackedParams = [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_term",
+      "utm_content",
+    ];
+
+    setHiddenFieldValue("origem_pagina", window.location.href);
+    setHiddenFieldValue("origem_referrer", document.referrer || "direto");
+
+    trackedParams.forEach((paramName) => {
+      setHiddenFieldValue(paramName, searchParams.get(paramName) || "");
+    });
+  }
+
+  function trackLeadSubmission(formData) {
+    if (typeof window.plausible !== "function") {
+      return;
+    }
+
+    window.plausible("Lead Form Submitted", {
+      props: {
+        form: "rodape",
+        source: formData.get("utm_source") || "direto",
+        campaign: formData.get("utm_campaign") || "sem_campanha",
+      },
+    });
+  }
+
+  const formspreeConfigured =
+    /^https:\/\/formspree\.io\/f\/[\w-]+$/i.test(formspreeEndpoint);
+
+  validationFields.forEach((field) => {
+    if (field.name === "whatsapp") {
+      field.addEventListener("input", () => {
+        sanitizeFieldValue(field, "input");
+
+        if (field.classList.contains("is-invalid")) {
+          validateField(field, "input");
+        }
+      });
+    } else {
+      field.addEventListener("input", () => {
+        if (field.classList.contains("is-invalid")) {
+          validateField(field, "input");
+        }
+      });
+    }
+
+    field.addEventListener("blur", () => {
+      validateField(field, "blur");
+    });
+  });
+
+  populateLeadContext();
+
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    if (!formspreeConfigured) {
+      setFeedbackState(
+        "Configure o endpoint real do Formspree em index.html antes de publicar este formulario.",
+        "error",
+      );
+      return;
+    }
+
+    populateLeadContext();
+    setHiddenFieldValue("submitted_at", new Date().toISOString());
+
     const formData = new FormData(form);
     const nome = formData.get("nome")?.toString().trim() || "Seu time";
-    feedback.textContent = `${nome}, recebemos seu pedido. Nossa equipe vai entrar em contato em breve pelo email ou WhatsApp informado.`;
-    feedback.style.color = "#0a6e48";
-    form.reset();
+
+    setSubmittingState(true);
+    setFeedbackState("Enviando seu pedido...", "loading");
+
+    try {
+      const response = await fetch(formspreeEndpoint, {
+        method: "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Formspree returned ${response.status}`);
+      }
+
+      trackLeadSubmission(formData);
+      setFeedbackState(
+        `${nome}, recebemos seu pedido. Nossa equipe vai entrar em contato em breve pelo email ou WhatsApp informado.`,
+        "success",
+      );
+      form.reset();
+      clearValidationState();
+      populateLeadContext();
+    } catch (error) {
+      setFeedbackState(
+        "Nao foi possivel enviar agora. Tente novamente em alguns instantes.",
+        "error",
+      );
+    } finally {
+      setSubmittingState(false);
+    }
   });
 }

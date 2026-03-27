@@ -8,6 +8,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script async src="https://plausible.io/js/pa-HlmHAi5IDni2QzDkRsFf2.js"></script>
+  <script>
+    window.plausible = window.plausible || function () { (plausible.q = plausible.q || []).push(arguments); };
+    plausible.init = plausible.init || function (options) { plausible.o = options || {}; };
+    plausible.init();
+  </script>
 </head>
 <body>
   <header class="topbar">
@@ -175,21 +181,34 @@
             </div>
           </div>
           <div class="form-card" data-reveal>
-            <form id="lead-form">
-              <label>Nome
-                <input type="text" name="nome" placeholder="Seu nome" required>
+            <form id="lead-form" action="https://formspree.io/f/mzdkzldd" method="POST" data-formspree-endpoint="https://formspree.io/f/mzdkzldd" novalidate>
+              <input type="hidden" name="_subject" value="Novo lead - Mira AI">
+              <input type="hidden" name="origem_pagina">
+              <input type="hidden" name="origem_referrer">
+              <input type="hidden" name="utm_source">
+              <input type="hidden" name="utm_medium">
+              <input type="hidden" name="utm_campaign">
+              <input type="hidden" name="utm_term">
+              <input type="hidden" name="utm_content">
+              <input type="hidden" name="submitted_at">
+              <label for="nome">Nome
+                <input id="nome" type="text" name="nome" placeholder="Seu nome" autocomplete="name" minlength="3" maxlength="80" aria-describedby="nome-error" required>
+                <span class="field-error" id="nome-error" aria-live="polite"></span>
               </label>
-              <label>Email
-                <input type="email" name="email" placeholder="voce@empresa.com" required>
+              <label for="email">Email
+                <input id="email" type="email" name="email" placeholder="voce@empresa.com" autocomplete="email" inputmode="email" maxlength="120" aria-describedby="email-error" required>
+                <span class="field-error" id="email-error" aria-live="polite"></span>
               </label>
-              <label>WhatsApp
-                <input type="tel" name="whatsapp" placeholder="(11) 99999-9999" required>
+              <label for="whatsapp">WhatsApp
+                <input id="whatsapp" type="tel" name="whatsapp" placeholder="(11) 99999-9999" autocomplete="tel" inputmode="numeric" maxlength="15" aria-describedby="whatsapp-error" required>
+                <span class="field-error" id="whatsapp-error" aria-live="polite"></span>
               </label>
-              <label>Empresa
-                <input type="text" name="empresa" placeholder="Nome da empresa" required>
+              <label for="empresa">Empresa
+                <input id="empresa" type="text" name="empresa" placeholder="Nome da empresa" autocomplete="organization" minlength="2" maxlength="100" aria-describedby="empresa-error" required>
+                <span class="field-error" id="empresa-error" aria-live="polite"></span>
               </label>
-              <button class="button button-primary" type="submit">Quero testar</button>
-              <p class="form-note" id="form-feedback">Seus dados serao usados apenas para contato comercial.</p>
+              <button class="button button-primary" type="submit" data-default-label="Quero testar" data-loading-label="Enviando...">Quero testar</button>
+              <p class="form-note" id="form-feedback" aria-live="polite">Seus dados serao usados apenas para contato comercial.</p>
             </form>
           </div>
         </div>

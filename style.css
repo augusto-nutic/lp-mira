@@ -230,6 +230,14 @@ button:hover {
   transform: translateY(-2px);
 }
 
+.button:disabled,
+button:disabled {
+  opacity: 0.78;
+  cursor: wait;
+  transform: none;
+  box-shadow: none;
+}
+
 .button-outline {
   background: rgba(255, 255, 255, 0.65);
   color: var(--ink);
@@ -625,8 +633,38 @@ input:focus {
   border-color: rgba(15, 143, 95, 0.3);
 }
 
+input.is-invalid {
+  border-color: #d92d20;
+  background: #fff6f5;
+}
+
+input.is-invalid:focus {
+  outline: 2px solid rgba(217, 45, 32, 0.18);
+  border-color: #d92d20;
+}
+
+.field-error {
+  min-height: 1.1rem;
+  color: #b42318;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
 .form-card .button {
   width: 100%;
+}
+
+.form-note.is-loading {
+  color: var(--ink);
+}
+
+.form-note.is-success {
+  color: var(--brand-strong);
+}
+
+.form-note.is-error {
+  color: #b42318;
 }
 
 .footer-shell {
