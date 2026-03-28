@@ -704,6 +704,7 @@ input.is-invalid:focus {
   .form-layout {
     grid-template-columns: 1fr;
   }
+  
 
   .section-head {
     align-items: start;
@@ -725,6 +726,10 @@ input.is-invalid:focus {
     scroll-padding-top: 7.6rem;
   }
 
+  .card.hero-grid {
+    display: flex;
+    flex-direction: column;
+  }
   body {
     background:
       radial-gradient(circle at 15% 0%, rgba(36, 184, 126, 0.3), transparent 24%),
@@ -875,7 +880,6 @@ input.is-invalid:focus {
   }
 
   .hero-panel {
-    order: -1;
     padding: 0.85rem;
     border-radius: 28px;
     background: linear-gradient(180deg, #0a1e18 0%, #103126 100%);
@@ -1100,6 +1104,7 @@ input.is-invalid:focus {
   .mobile-dock-primary.is-active {
     background: linear-gradient(135deg, #24b87e, var(--brand-strong));
   }
+  
 }
 
 @media (max-width: 520px) {
